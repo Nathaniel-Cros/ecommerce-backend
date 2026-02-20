@@ -43,15 +43,27 @@ Detener servicios:
 docker compose down
 ```
 
+## API Versioning
+Todas las rutas publicas se exponen bajo el prefijo `/api/v1`.
+
+- Health: `GET /api/v1/health`
+- DB Ping: `GET /api/v1/db/ping`
+- Products: `POST /api/v1/products`, `GET /api/v1/products`
+- Orders: prefijo reservado `/api/v1/orders` (scaffold sin handlers aun)
+
 ## Endpoints actuales
-- `GET /health`
-- `GET /db/ping`
-- `POST /products`
-- `GET /products` (solo activos)
+- `GET /api/v1/health`
+- `GET /api/v1/db/ping`
+- `POST /api/v1/products`
+- `GET /api/v1/products` (solo activos)
 
 Ejemplo rapido:
 ```bash
-curl -X POST http://127.0.0.1:8000/products \
+curl -X GET http://127.0.0.1:8000/api/v1/health
+
+curl -X GET http://127.0.0.1:8000/api/v1/db/ping
+
+curl -X POST http://127.0.0.1:8000/api/v1/products \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Magnesio",
@@ -62,7 +74,10 @@ curl -X POST http://127.0.0.1:8000/products \
     "is_active": true
   }'
 
-curl http://127.0.0.1:8000/products
+curl http://127.0.0.1:8000/api/v1/products
+
+# Orders aun no implementa handlers (respuesta esperada: 404)
+curl -i http://127.0.0.1:8000/api/v1/orders
 ```
 
 ## Correr tests

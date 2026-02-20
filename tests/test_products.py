@@ -32,7 +32,7 @@ def test_create_product_returns_created() -> None:
     client = TestClient(app)
 
     response = client.post(
-        "/products",
+        "/api/v1/products",
         json={
             "name": "Omega 3",
             "description": "Aceite de pescado",
@@ -75,10 +75,10 @@ def test_list_products_returns_only_active() -> None:
         "is_active": False,
     }
 
-    assert client.post("/products", json=active_payload).status_code == 201
-    assert client.post("/products", json=inactive_payload).status_code == 201
+    assert client.post("/api/v1/products", json=active_payload).status_code == 201
+    assert client.post("/api/v1/products", json=inactive_payload).status_code == 201
 
-    response = client.get("/products")
+    response = client.get("/api/v1/products")
 
     assert response.status_code == 200
     products = response.json()

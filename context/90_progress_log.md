@@ -1,5 +1,28 @@
 # 90 Progress Log
 
+## [2026-02-20 13:26 CST aprox] Nota - Versionado centralizado `/api/v1`
+
+- Qué se hizo:
+  - Se centralizo el versionado en `register_routes` usando un router raiz con prefix `/api/v1`.
+  - Se movieron `health` y `db/ping` al ensamblado versionado para que queden bajo `/api/v1`.
+  - Se actualizaron pruebas y README con las rutas nuevas.
+- Archivos tocados:
+  - `app/shared/infrastructure/http/routes.py`
+  - `app/main.py`
+  - `tests/test_health.py`
+  - `tests/test_db_ping.py`
+  - `tests/test_products.py`
+  - `README.md`
+  - `context/01_architecture_rules.md`
+  - `context/90_progress_log.md`
+- Rutas afectadas:
+  - `GET /health` -> `GET /api/v1/health`
+  - `GET /db/ping` -> `GET /api/v1/db/ping`
+  - `POST /products` -> `POST /api/v1/products`
+  - `GET /products` -> `GET /api/v1/products`
+- Recomendacion:
+  - Mantener el versionado exclusivamente en el agregador (`register_routes`) y no repetir `/api/v1` en routers de contexto.
+
 ## [2026-02-20 13:26 CST aprox] Step 4 - Products end-to-end (hexagonal)
 
 ### Objetivo

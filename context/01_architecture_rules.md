@@ -22,15 +22,18 @@ Acordar reglas no negociables para implementar arquitectura hexagonal (Ports and
 - Controllers no contienen logica de negocio; solo validan entrada, invocan caso de uso y formatean salida.
 - Casos de uso no dependen de FastAPI ni de objetos ORM.
 - Domain no importa nada de infraestructura.
+- El versionado (`/api/v1`) se aplica SOLO en el punto de ensamblado (`register_routes`) y nunca dentro de routers de contexto.
 - Evitar Redis/Celery/colas en MVP.
 
 ## Do / Don't
 - Do: definir puertos en Domain para repositorios, pagos y clock/id providers.
 - Do: inyectar implementaciones concretas desde Infrastructure hacia Application.
 - Do: retornar objetos de dominio desde Application y traducir a DTO HTTP al final.
+- Do: centralizar prefix de version en el agregador de rutas.
 - Don't: usar `Session` de SQLAlchemy dentro de casos de uso.
 - Don't: pasar modelos Pydantic al Domain.
 - Don't: meter reglas de estados de orden/pago en routers.
+- Don't: repetir `/api/v1` en cada router de contexto.
 
 ## Ejemplo breve
 - Correcto:

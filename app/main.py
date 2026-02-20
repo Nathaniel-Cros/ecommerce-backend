@@ -1,11 +1,12 @@
 """FastAPI application entrypoint."""
 
-from fastapi import Depends, FastAPI
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, FastAPI
 from sqlalchemy.orm import Session
 
 from app.shared.infrastructure.http.routes import register_routes
 from app.contexts.store.products.infrastructure.product_model import ProductModel
-from typing import Annotated
 from app.shared.config.settings import get_settings
 from app.shared.infrastructure.db.base import Base
 from app.shared.infrastructure.db.ping import ping_db
@@ -17,8 +18,9 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="Ecommerce Backend", version="0.2.0")
     settings = get_settings()
+    system_router = APIRouter(tags=["system"])
 
-    register_routes(app)
+    register_routes(app, system_router=system_router)
 
     @app.on_event("startup")
     def startup() -> None:
