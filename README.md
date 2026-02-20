@@ -1,6 +1,6 @@
-# Ecommerce Backend Scaffold (Step 3)
+# Ecommerce Backend Scaffold (Step 4)
 
-Base ejecutable del backend con FastAPI + SQLAlchemy 2.0 y estructura hexagonal minima (Ports and Adapters).
+Base ejecutable del backend con FastAPI + SQLAlchemy 2.0 y arquitectura hexagonal minima.
 
 ## Requisitos
 - Python 3.12
@@ -11,7 +11,7 @@ Base ejecutable del backend con FastAPI + SQLAlchemy 2.0 y estructura hexagonal 
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install fastapi "uvicorn[standard]" sqlalchemy pydantic-settings pytest httpx psycopg[binary]
+pip install fastapi "uvicorn[standard]" sqlalchemy pydantic-settings pytest httpx "psycopg[binary]"
 ```
 
 Variables recomendadas:
@@ -43,16 +43,38 @@ Detener servicios:
 docker compose down
 ```
 
+## Endpoints actuales
+- `GET /health`
+- `GET /db/ping`
+- `POST /products`
+- `GET /products` (solo activos)
+
+Ejemplo rapido:
+```bash
+curl -X POST http://127.0.0.1:8000/products \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Magnesio",
+    "description": "Suplemento",
+    "price_cents": 18900,
+    "currency": "MXN",
+    "stock": 12,
+    "is_active": true
+  }'
+
+curl http://127.0.0.1:8000/products
+```
+
 ## Correr tests
 ```bash
 pytest -q
 ```
 
-Nota de tests: `test_db_ping.py` usa SQLite in-memory por override de dependencia para mantener pruebas rapidas y aisladas.
+## Migraciones
+Alembic todavia no existe en este repo.
 
-## Estado del proyecto
-Este step solo prepara la base del backend; los modelos de negocio y migraciones vienen en el siguiente step.
+TODO (step siguiente):
+- Crear setup de Alembic.
+- Generar primera migracion para la tabla `products`.
 
-## TODO (siguiente step)
-- Integrar Alembic para migraciones SQLAlchemy.
-- Crear modelos de negocio (products, orders, payments).
+Nota temporal: en `ENV=dev` y `ENV=test`, la app crea tablas ORM al arrancar para facilitar pruebas locales.
