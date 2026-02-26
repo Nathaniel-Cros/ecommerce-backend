@@ -1,5 +1,57 @@
 # 90 Progress Log
 
+## [2026-02-25 21:07 CST aprox] Step 5 - Orders + OrderItems snapshot + Payment base
+
+### Objetivo
+- Implementar creacion de orden end-to-end con snapshot de items y modelo base de pago, respetando hexagonal.
+
+### Que se implemento
+- Dominio de orders:
+  - `OrderItem` (snapshot obligatorio y `quantity > 0`)
+  - `Order` (al menos 1 item, `total_cents` calculado, estados base)
+  - `Payment` base (estados: `created|pending|approved|rejected|cancelled|refunded`)
+  - `OrderRepository` como puerto (Protocol).
+- Application:
+  - `CreateOrderUseCase` con transaccion (`begin/commit/rollback`) y reglas:
+    - valida items
+    - consulta productos activos
+    - construye snapshot de items
+    - crea `Payment` en `created`
+- Infrastructure:
+  - modelos SQLAlchemy: `orders`, `order_items`, `payments`
+  - `SQLOrderRepository` con mappers explicitos ORM <-> domain/projection.
+- HTTP:
+  - `POST /api/v1/orders` con request/response del step.
+- Routing:
+  - `app/shared/infrastructure/http/routes.py` centraliza import y ensamblado de rutas versionadas para mantener `main.py` limpio.
+- Runtime/tests:
+  - se removio `Base.metadata.create_all` de `main.py`.
+  - tests usan schema SQLite explicito (`tests/sqlite_schema.py`) sin `create_all`.
+
+### Archivos tocados
+- Creados:
+  - `app/contexts/store/orders/domain/order_item.py`
+  - `app/contexts/store/orders/domain/order.py`
+  - `app/contexts/store/orders/domain/payment.py`
+  - `app/contexts/store/orders/domain/order_repository.py`
+  - `app/contexts/store/orders/application/create_order.py`
+  - `app/contexts/store/orders/infrastructure/order_models.py`
+  - `app/contexts/store/orders/infrastructure/sql_order_repository.py`
+  - `tests/sqlite_schema.py`
+  - `tests/test_orders.py`
+- Modificados:
+  - `app/contexts/store/orders/infrastructure/http/router.py`
+  - `app/shared/infrastructure/http/routes.py`
+  - `app/main.py`
+  - `tests/test_products.py`
+  - `README.md`
+  - `context/01_architecture_rules.md`
+  - `context/90_progress_log.md`
+
+### Notas
+- Alembic no existe aun: pendiente crear migraciones reales para tablas nuevas.
+- Endpoints tecnicos (`/health`, `/db/ping`) quedan fuera de `/api/v1`.
+
 ## [2026-02-20 13:26 CST aprox] Nota - Versionado centralizado `/api/v1`
 
 - Qué se hizo:

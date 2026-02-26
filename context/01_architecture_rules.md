@@ -23,6 +23,7 @@ Acordar reglas no negociables para implementar arquitectura hexagonal (Ports and
 - Casos de uso no dependen de FastAPI ni de objetos ORM.
 - Domain no importa nada de infraestructura.
 - El versionado (`/api/v1`) se aplica SOLO en el punto de ensamblado (`register_routes`) y nunca dentro de routers de contexto.
+- Excepcion tecnica: `GET /health` y `GET /db/ping` se exponen fuera de `/api/v1`.
 - Evitar Redis/Celery/colas en MVP.
 
 ## Do / Don't
@@ -30,6 +31,7 @@ Acordar reglas no negociables para implementar arquitectura hexagonal (Ports and
 - Do: inyectar implementaciones concretas desde Infrastructure hacia Application.
 - Do: retornar objetos de dominio desde Application y traducir a DTO HTTP al final.
 - Do: centralizar prefix de version en el agregador de rutas.
+- Do: mantener `health` y `db/ping` sin versionado para monitoreo tecnico.
 - Don't: usar `Session` de SQLAlchemy dentro de casos de uso.
 - Don't: pasar modelos Pydantic al Domain.
 - Don't: meter reglas de estados de orden/pago en routers.

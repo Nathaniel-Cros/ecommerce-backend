@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.main import app
-from app.shared.infrastructure.db.base import Base
 from app.shared.infrastructure.db.session import get_db
+from tests.sqlite_schema import reset_sqlite_schema
 
 engine = create_engine(
     "sqlite+pysqlite://",
@@ -27,7 +27,7 @@ def override_get_db() -> Generator[Session, None, None]:
 
 
 def test_create_product_returns_created() -> None:
-    Base.metadata.create_all(bind=engine)
+    reset_sqlite_schema(engine)
     app.dependency_overrides[get_db] = override_get_db
     client = TestClient(app)
 
@@ -50,11 +50,10 @@ def test_create_product_returns_created() -> None:
     assert body["price_cents"] == 25900
 
     app.dependency_overrides.clear()
-    Base.metadata.drop_all(bind=engine)
 
 
 def test_list_products_returns_only_active() -> None:
-    Base.metadata.create_all(bind=engine)
+    reset_sqlite_schema(engine)
     app.dependency_overrides[get_db] = override_get_db
     client = TestClient(app)
 
@@ -87,4 +86,3 @@ def test_list_products_returns_only_active() -> None:
     assert products[0]["is_active"] is True
 
     app.dependency_overrides.clear()
-    Base.metadata.drop_all(bind=engine)

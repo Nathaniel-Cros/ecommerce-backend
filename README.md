@@ -1,4 +1,4 @@
-# Ecommerce Backend Scaffold (Step 4)
+# Ecommerce Backend Scaffold (Step 5)
 
 Base ejecutable del backend con FastAPI + SQLAlchemy 2.0 y arquitectura hexagonal minima.
 
@@ -27,7 +27,7 @@ uvicorn app.main:app --reload
 ```
 
 ## Correr con docker-compose (Postgres)
-Levantar solo base de datos de desarrollo:
+Levantar base de datos:
 ```bash
 docker compose up -d db
 ```
@@ -44,25 +44,28 @@ docker compose down
 ```
 
 ## API Versioning
-Todas las rutas publicas se exponen bajo el prefijo `/api/v1`.
+- Rutas de dominio versionadas bajo `/api/v1`.
+- Endpoints tecnicos fuera de versionado:
+  - `GET /health`
+  - `GET /db/ping`
 
-- Health: `GET /api/v1/health`
-- DB Ping: `GET /api/v1/db/ping`
-- Products: `POST /api/v1/products`, `GET /api/v1/products`
-- Orders: prefijo reservado `/api/v1/orders` (scaffold sin handlers aun)
+## Estructura de rutas
+- `app/shared/infrastructure/http/routes.py` centraliza el registro de rutas versionadas (`products`, `orders`) para mantener `app/main.py` limpio.
 
 ## Endpoints actuales
-- `GET /api/v1/health`
-- `GET /api/v1/db/ping`
+- `GET /health`
+- `GET /db/ping`
 - `POST /api/v1/products`
-- `GET /api/v1/products` (solo activos)
+- `GET /api/v1/products`
+- `POST /api/v1/orders`
 
-Ejemplo rapido:
+## Ejemplos curl
 ```bash
-curl -X GET http://127.0.0.1:8000/api/v1/health
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/db/ping
+```
 
-curl -X GET http://127.0.0.1:8000/api/v1/db/ping
-
+```bash
 curl -X POST http://127.0.0.1:8000/api/v1/products \
   -H "Content-Type: application/json" \
   -d '{
@@ -73,11 +76,18 @@ curl -X POST http://127.0.0.1:8000/api/v1/products \
     "stock": 12,
     "is_active": true
   }'
+```
 
-curl http://127.0.0.1:8000/api/v1/products
-
-# Orders aun no implementa handlers (respuesta esperada: 404)
-curl -i http://127.0.0.1:8000/api/v1/orders
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_name": "Juan Perez",
+    "customer_phone": "5512345678",
+    "items": [
+      {"product_id": "PUT_PRODUCT_ID_HERE", "quantity": 2}
+    ]
+  }'
 ```
 
 ## Correr tests
@@ -88,8 +98,8 @@ pytest -q
 ## Migraciones
 Alembic todavia no existe en este repo.
 
-TODO (step siguiente):
+TODO (siguiente step):
 - Crear setup de Alembic.
-- Generar primera migracion para la tabla `products`.
+- Generar migraciones para `products`, `orders`, `order_items` y `payments`.
 
-Nota temporal: en `ENV=dev` y `ENV=test`, la app crea tablas ORM al arrancar para facilitar pruebas locales.
+Nota: no se usa `Base.metadata.create_all` en runtime.
