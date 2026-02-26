@@ -1,4 +1,4 @@
-# Ecommerce Backend Scaffold (Step 5)
+# Ecommerce Backend Scaffold (Step 6)
 
 Base ejecutable del backend con FastAPI + SQLAlchemy 2.0 y arquitectura hexagonal minima.
 
@@ -59,6 +59,18 @@ docker compose down
 - `GET /api/v1/products`
 - `POST /api/v1/orders`
 
+## Mercado Pago Integration (Step 6)
+La orden soporta `payment_method`:
+- `cash`: no genera preference, `payment_url` queda en `null`.
+- `mercadopago`: genera Checkout Pro preference y devuelve `payment_url`.
+
+Variables requeridas en `.env`:
+```bash
+MP_ACCESS_TOKEN=
+MP_WEBHOOK_URL=
+MP_ENVIRONMENT=sandbox
+```
+
 ## Ejemplos curl
 ```bash
 curl http://127.0.0.1:8000/health
@@ -84,6 +96,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/orders \
   -d '{
     "customer_name": "Juan Perez",
     "customer_phone": "5512345678",
+    "payment_method": "mercadopago",
     "items": [
       {"product_id": "PUT_PRODUCT_ID_HERE", "quantity": 2}
     ]

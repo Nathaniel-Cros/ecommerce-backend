@@ -67,6 +67,9 @@ def reset_sqlite_schema(engine: Engine) -> None:
                 status TEXT NOT NULL,
                 amount_cents INTEGER NOT NULL,
                 currency TEXT NOT NULL,
+                external_payment_id TEXT NULL,
+                init_point TEXT NULL,
+                sandbox_init_point TEXT NULL,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
             );

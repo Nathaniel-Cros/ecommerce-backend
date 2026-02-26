@@ -1,5 +1,35 @@
 # 90 Progress Log
 
+## [2026-02-25 21:41 CST aprox] Step 6 - Mercado Pago Checkout Pro (sin webhook)
+
+### Objetivo
+- Generar preference de Mercado Pago al crear orden con `payment_method=mercadopago`, persistir datos en `Payment` y devolver `payment_url`.
+
+### Que se implemento
+- Domain:
+  - puerto `PaymentGateway` (Protocol).
+  - `PaymentProviderResponse` (dataclass).
+  - `Payment` extendido con `external_payment_id`, `init_point`, `sandbox_init_point`.
+- Application:
+  - `CreateOrderUseCase` recibe `PaymentGateway`.
+  - soporte a `payment_method` (`cash` / `mercadopago`).
+  - para `mercadopago`: crea preference, actualiza `Payment` a `pending` y guarda URLs/ID externos.
+  - retorna `payment_url` en resultado del caso de uso.
+- Infrastructure:
+  - adapter `MercadoPagoGateway` en `orders/infrastructure/mercadopago/mercadopago_gateway.py` usando API HTTP sync.
+  - `PaymentModel` y repositorio SQL actualizados para campos de provider.
+- HTTP:
+  - `POST /api/v1/orders` acepta `payment_method` enum y devuelve `payment_url`.
+- Settings:
+  - `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_WEBHOOK_URL`, `MP_ENVIRONMENT`.
+- Testing:
+  - tests de orders mockean `PaymentGateway` (sin llamadas reales a MP).
+  - nuevos tests para `mercadopago` (con URL) y `cash` (sin URL).
+
+### Notas
+- Webhook de Mercado Pago no se implementa en este step.
+- Se mantiene versionado de dominio en `/api/v1` y endpoints tecnicos fuera de versionado.
+
 ## [2026-02-25 21:07 CST aprox] Step 5 - Orders + OrderItems snapshot + Payment base
 
 ### Objetivo

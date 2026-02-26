@@ -28,6 +28,9 @@ class Payment:
     amount_cents: int
     status: PaymentStatus = "created"
     currency: str = "MXN"
+    external_payment_id: str | None = None
+    init_point: str | None = None
+    sandbox_init_point: str | None = None
     id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=_utc_now)
 

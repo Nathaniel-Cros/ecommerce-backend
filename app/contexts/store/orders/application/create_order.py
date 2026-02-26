@@ -2,10 +2,12 @@
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Literal
 from uuid import UUID, uuid4
 
 from app.contexts.store.orders.domain.order import Order
 from app.contexts.store.orders.domain.order_item import OrderItem
+from app.contexts.store.orders.domain.payment_gateway import PaymentGateway
 from app.contexts.store.orders.domain.order_repository import (
     ActiveProductSnapshot,
     OrderRepository,
@@ -25,6 +27,10 @@ class InvalidOrderError(CreateOrderError):
     """Raised for invalid order input."""
 
 
+class PaymentGatewayError(CreateOrderError):
+    """Raised when preference creation with provider fails."""
+
+
 @dataclass(frozen=True, slots=True)
 class CreateOrderItemInput:
     product_id: UUID
@@ -36,6 +42,13 @@ class CreateOrderCommand:
     customer_name: str
     customer_phone: str
     items: list[CreateOrderItemInput]
+    payment_method: Literal["mercadopago", "cash"]
+
+
+@dataclass(frozen=True, slots=True)
+class CreateOrderResult:
+    order: Order
+    payment_url: str | None
 
 
 def _generate_order_number() -> str:
@@ -47,10 +60,11 @@ def _generate_order_number() -> str:
 class CreateOrderUseCase:
     """Application service that creates an order and a base payment."""
 
-    def __init__(self, repository: OrderRepository) -> None:
+    def __init__(self, repository: OrderRepository, payment_gateway: PaymentGateway) -> None:
         self._repository = repository
+        self._payment_gateway = payment_gateway
 
-    def execute(self, command: CreateOrderCommand) -> Order:
+    def execute(self, command: CreateOrderCommand) -> CreateOrderResult:
         if len(command.items) == 0:
             raise InvalidOrderError("order must include at least one item")
 
@@ -85,10 +99,33 @@ class CreateOrderUseCase:
             self._repository.add_order(order)
             self._repository.add_payment(payment)
             self._repository.commit()
-            return order
         except Exception:
             self._repository.rollback()
             raise
+
+        payment_url: str | None = None
+        if command.payment_method == "mercadopago":
+            try:
+                provider_response = self._payment_gateway.create_preference(order)
+            except Exception as exc:
+                raise PaymentGatewayError("failed to create Mercado Pago preference") from exc
+
+            payment.status = "pending"
+            payment.external_payment_id = provider_response.provider_payment_id
+            payment.init_point = provider_response.init_point
+            payment.sandbox_init_point = provider_response.sandbox_init_point
+
+            self._repository.begin()
+            try:
+                self._repository.update_payment(payment)
+                self._repository.commit()
+            except Exception:
+                self._repository.rollback()
+                raise
+
+            payment_url = provider_response.init_point
+
+        return CreateOrderResult(order=order, payment_url=payment_url)
 
     def _build_items(
         self,

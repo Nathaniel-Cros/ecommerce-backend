@@ -51,6 +51,9 @@ def _to_payment_model(payment: Payment) -> PaymentModel:
         status=payment.status,
         amount_cents=payment.amount_cents,
         currency=payment.currency,
+        external_payment_id=payment.external_payment_id,
+        init_point=payment.init_point,
+        sandbox_init_point=payment.sandbox_init_point,
         created_at=payment.created_at,
     )
 
@@ -106,3 +109,13 @@ class SQLOrderRepository(OrderRepository):
 
     def add_payment(self, payment: Payment) -> None:
         self._session.add(_to_payment_model(payment))
+
+    def update_payment(self, payment: Payment) -> None:
+        model = self._session.get(PaymentModel, str(payment.id))
+        if model is None:
+            raise ValueError("payment not found")
+
+        model.status = payment.status
+        model.external_payment_id = payment.external_payment_id
+        model.init_point = payment.init_point
+        model.sandbox_init_point = payment.sandbox_init_point

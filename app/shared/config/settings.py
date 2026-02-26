@@ -22,6 +22,13 @@ class Settings(BaseSettings):
     )
     env: Literal["dev", "test", "prod"] = Field(default="dev", alias="ENV")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    mp_access_token: str | None = Field(default=None, alias="MP_ACCESS_TOKEN")
+    mp_public_key: str | None = Field(default=None, alias="MP_PUBLIC_KEY")
+    mp_webhook_url: str | None = Field(default=None, alias="MP_WEBHOOK_URL")
+    mp_environment: Literal["sandbox", "prod"] = Field(
+        default="sandbox",
+        alias="MP_ENVIRONMENT",
+    )
 
 
 @lru_cache(maxsize=1)

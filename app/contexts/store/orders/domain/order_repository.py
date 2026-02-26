@@ -41,3 +41,6 @@ class OrderRepository(Protocol):
 
     def add_payment(self, payment: Payment) -> None:
         ...
+
+    def update_payment(self, payment: Payment) -> None:
+        ...
